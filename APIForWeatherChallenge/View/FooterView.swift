@@ -13,7 +13,6 @@ class FooterView: UIView {
     let footerSearchButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(named: "search"), for: .normal)
-//        button.addTarget(self, action: #selector(buttonAction), for: .touchUpInside)
         return button
     }()
     

@@ -6,10 +6,13 @@
 //
 
 import UIKit
+import Lottie
 
 class SearchTVC: UITableViewController {
     
-    
+//    override func viewDidDisappear(_ animated: Bool) {
+//        presentLoadingVC()
+//    }
     var searchController = UISearchController(searchResultsController: nil)
     //城市集合
     var cityListForAPI = [CityAPI]()
@@ -34,9 +37,9 @@ class SearchTVC: UITableViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         if cityResultForTableView == nil {
-            delegate.citySearch(city: cityResultForSearchBar!)
+            delegate.citySearch(city: cityResultForSearchBar ?? "")
         }else{
-            delegate.citySearch(city: cityResultForTableView!)
+            delegate.citySearch(city: cityResultForTableView ?? "")
         }
     }
     
@@ -77,20 +80,19 @@ class SearchTVC: UITableViewController {
     
     
     
-    
+    //MARK: tableView
     func setTableView() {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "MyCell")
         
     }
-    
+    //MARK: navigation
     func setNavigation() {
-        self.title = "輸入城市"
+        self.title = "輸入城市、座標、編號"
         self.navigationItem.searchController = searchController
         self.navigationItem.hidesSearchBarWhenScrolling = false
         self.navigationController?.navigationBar.barTintColor = #colorLiteral(red: 0.4745098054, green: 0.8392156959, blue: 0.9764705896, alpha: 1)
     }
-    
-    
+    //MARK: searchController
     func setSearchController() {
         searchController.searchBar.searchBarStyle = .prominent
         searchController.hidesNavigationBarDuringPresentation = false
@@ -155,15 +157,8 @@ extension SearchTVC: UISearchBarDelegate,UISearchResultsUpdating {
         }
         searchCityData()
         
-//        guard let searchString = searchController.searchBar.text else {return}
-        
-        
-//        if searchString.isEmpty == false {
-//            searchData = city.filter { (name) -> Bool in
-//                return name
-//            }
-//        }
     }
+    
     
     func searchCityData() {
         searchData = cityForAPI.filter({(name) -> Bool in
@@ -184,3 +179,8 @@ extension SearchTVC: UISearchBarDelegate,UISearchResultsUpdating {
         self.presentingViewController?.dismiss(animated: true, completion: nil)
     }
 }
+
+
+
+
+

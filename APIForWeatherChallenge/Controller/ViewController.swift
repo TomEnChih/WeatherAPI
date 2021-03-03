@@ -11,7 +11,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
     
     var weathers = [WeatherData]()
     var tempMode: tempTransform = .C
-    var weatherTableView = UITableView()
+    var weatherTableView = UITableView() 
     let fullScreenSize = UIScreen.main.bounds
     
     let footerView = FooterView()
@@ -115,6 +115,10 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         footerView.footerSearchButton.addTarget(self, action: #selector(searchCityButton(sender:)), for: .touchUpInside)
         
     }
+    override func viewDidAppear(_ animated: Bool) {
+        presentLoadingVC()
+    }
+
     
     //MARK: - 刪除
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
@@ -139,7 +143,12 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         let vc = SearchTVC()
         let nav = UINavigationController(rootViewController: vc)
         vc.delegate = self
+        nav.modalPresentationStyle = .overCurrentContext
         present(nav, animated: true, completion: nil)
+    }
+    
+    @objc func loading(sender: UIButton) {
+        presentLoadingVC()
     }
     
     
@@ -203,8 +212,19 @@ extension ViewController: UITableViewDelegate,UITableViewDataSource {
     }
 }
 
+//MARK: - delegate
 extension ViewController: SearchResult {
     func citySearch(city: String) {
+        presentLoadingVC()
         setCurrentWeather(city: city)
+    }
+}
+//MARK: - loading 畫面
+extension ViewController {
+    func presentLoadingVC() {
+        let vc = LoadingViewController()
+        vc.modalPresentationStyle = .overCurrentContext
+        vc.modalTransitionStyle = .crossDissolve
+        present(vc, animated: true, completion: nil)
     }
 }
