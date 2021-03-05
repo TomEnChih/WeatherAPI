@@ -11,16 +11,16 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
     
     var weathers = [WeatherData]()
     var tempMode: tempTransform = .C
-    var weatherTableView = UITableView() 
     let fullScreenSize = UIScreen.main.bounds
     
+    let mainView = MainView()
     let footerView = FooterView()
     
     func setCurrentWeather(city:String) {
         let address = "http://api.openweathermap.org/data/2.5/weather?"
         let urlDetermine:URL
         let modeSelect = Int(city)
-        
+        #warning("有其他方法")
         if city.contains(","){
             
             let cityCoord = city.components(separatedBy: ",")
@@ -39,8 +39,12 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         
         
         let url = urlDetermine
+        
+        
         if  url == url {
-            URLSession.shared.dataTask(with: url){(data,response,error) in
+            #warning("loading")
+            let request = URLRequest(url: url, timeoutInterval: 10.0)
+            URLSession.shared.dataTask(with: request){(data,response,error) in
                 DispatchQueue.main.async {
                     if let error = error {
                         print("Error: \(error.localizedDescription)")
@@ -49,14 +53,14 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
                         let decoder = JSONDecoder()
                         
                         if let weatherData = try? decoder.decode(WeatherData.self, from: data) {
-                            
+                            //do catch
 //                            print(weatherData)
 //                            print("城市名稱: \(weatherData.name)")
 //                            print("經緯度: (\(weatherData.coord.lon),\(weatherData.coord.lat))")
 //                            print("溫度: \(weatherData.main.temp)°C")
 //                            print("描述: \(weatherData.weather[0].description)")
                             self.weathers.append(weatherData)
-                            self.weatherTableView.reloadData()
+                            self.mainView.weatherTableView.reloadData()
                             
                         }
                     }
@@ -71,46 +75,16 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
     
     
     func setweatherTableView() {
-        weatherTableView.register(WeatherTVCell.self, forCellReuseIdentifier: "Cell")
-        weatherTableView.rowHeight = fullScreenSize.height * 0.08
-        weatherTableView.allowsSelectionDuringEditing = false
-        weatherTableView.backgroundColor = #colorLiteral(red: 0.4745098054, green: 0.8392156959, blue: 0.9764705896, alpha: 1)
-        weatherTableView.delegate = self
-        weatherTableView.dataSource = self
-        view.addSubview(weatherTableView)
-    }
-    
-    //MARK: - autoLayout
-    func setweatherTableViewConstraints() {
-        weatherTableView.translatesAutoresizingMaskIntoConstraints = false
-        weatherTableView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
-        weatherTableView.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
-        weatherTableView.heightAnchor.constraint(equalTo: view.heightAnchor).isActive = true
-        weatherTableView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-    }
-    
-    func setFooterElementConstraints() {
-        let footerSearchButton = footerView.footerSearchButton
-        footerSearchButton.translatesAutoresizingMaskIntoConstraints = false
-        footerSearchButton.trailingAnchor.constraint(equalTo: footerView.trailingAnchor,constant: -10).isActive = true
-        footerSearchButton.centerYAnchor.constraint(equalTo: footerView.centerYAnchor).isActive = true
-        footerSearchButton.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        footerSearchButton.widthAnchor.constraint(equalToConstant: 30).isActive = true
-        
-        let footerStackView = footerView.footerStackView
-        footerStackView.translatesAutoresizingMaskIntoConstraints = false
-        footerStackView.leadingAnchor.constraint(equalTo: footerView.leadingAnchor,constant: 10).isActive = true
-        footerStackView.centerYAnchor.constraint(equalTo: footerView.centerYAnchor).isActive = true
+        mainView.weatherTableView.delegate = self
+        mainView.weatherTableView.dataSource = self
     }
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
+        view = mainView
         setweatherTableView()
-        setweatherTableViewConstraints()
         setCurrentWeather(city: "taipei")
-        setFooterElementConstraints()
         singleFinger()
         footerView.footerSearchButton.addTarget(self, action: #selector(searchCityButton(sender:)), for: .touchUpInside)
         
@@ -131,7 +105,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
     
     //MARK: - footer
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        
+        //let footerview
+        //footer 可能會有問題 第二個沒功能之類的？
         return footerView
     }
     
@@ -143,7 +118,6 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         let vc = SearchTVC()
         let nav = UINavigationController(rootViewController: vc)
         vc.delegate = self
-        nav.modalPresentationStyle = .overCurrentContext
         present(nav, animated: true, completion: nil)
     }
     
@@ -158,7 +132,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         let singleFinger = UITapGestureRecognizer(target: self, action: #selector(fingleTap))
         singleFinger.numberOfTapsRequired = 1
         singleFinger.numberOfTouchesRequired = 1
-        //為元件加入手勢的func
+        #warning("為元件加入手勢的func")
         footerView.footerStackView.addGestureRecognizer(singleFinger)
     }
     
@@ -174,7 +148,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
             righthLabel.textColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
             tempMode = .C
         }
-        weatherTableView.reloadData()
+        mainView.weatherTableView.reloadData()
         
     }
 }
@@ -190,11 +164,12 @@ extension ViewController: UITableViewDelegate,UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = weatherTableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! WeatherTVCell
+        #warning("換 看mark")
+        let cell = mainView.weatherTableView.dequeueReusableCell(withIdentifier: WeatherTVCell.weatherCellID, for: indexPath) as! WeatherTVCell
         let weatherIndex = weathers[indexPath.row]
         cell.backgroundColor = #colorLiteral(red: 0.4745098054, green: 0.8392156959, blue: 0.9764705896, alpha: 1)
         cell.isUserInteractionEnabled = false
-        
+        #warning("找更好的方法")
         let url = URL(string: "http://openweathermap.org/img/wn/\(weatherIndex.weather[0].icon)@2x.png")
         let data = try? Data(contentsOf: url!)
         if let imageData = data {

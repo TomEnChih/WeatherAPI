@@ -10,9 +10,6 @@ import Lottie
 
 class SearchTVC: UITableViewController {
     
-//    override func viewDidDisappear(_ animated: Bool) {
-//        presentLoadingVC()
-//    }
     var searchController = UISearchController(searchResultsController: nil)
     //城市集合
     var cityListForAPI = [CityAPI]()
@@ -24,6 +21,12 @@ class SearchTVC: UITableViewController {
     var delegate: SearchResult!
     var cityResultForTableView: String?
     var cityResultForSearchBar: String?
+    
+    var container: CityContainer = .init() {
+        didSet {
+            tableView.reloadData()
+        }
+    }
     
     
     override func viewDidLoad() {
@@ -69,7 +72,7 @@ class SearchTVC: UITableViewController {
                     for i in 0..<cityData.results.count {
                         city.append(cityData.results[i].name)
                     }
-                    
+                    self.container.updateCities(cities: cityData.results)
                     self.cityForAPI.append(contentsOf: city)
                 }
                 
@@ -109,6 +112,43 @@ class SearchTVC: UITableViewController {
     
 }
 //MARK: - set tableView
+//extension SearchTVC {
+//
+//    override func numberOfSections(in tableView: UITableView) -> Int {
+//        return 1
+//    }
+//
+//    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+//        if isShowSearchResult {
+//            return searchData.count
+//        }else{
+//            return defaultCitys.count
+//        }
+//    }
+//
+//    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+//        let cell = tableView.dequeueReusableCell(withIdentifier: "MyCell")
+//        cell?.backgroundColor = #colorLiteral(red: 0.4745098054, green: 0.8392156959, blue: 0.9764705896, alpha: 1)
+//
+//        if isShowSearchResult {
+//            cell?.textLabel?.text = searchData[indexPath.row]
+//        } else {
+//            cell?.textLabel?.text = defaultCitys[indexPath.row]
+//        }
+//
+//        return cell!
+//    }
+//
+//    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//        if isShowSearchResult {
+//            cityResultForTableView = searchData[indexPath.row]
+//        } else {
+//            cityResultForTableView = defaultCitys[indexPath.row]
+//        }
+//        self.view.window?.rootViewController?.dismiss(animated: true, completion: nil)
+//    }
+//
+//}
 extension SearchTVC {
     
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -117,7 +157,7 @@ extension SearchTVC {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if isShowSearchResult {
-            return searchData.count
+            return container.filterdCities.count
         }else{
             return defaultCitys.count
         }
@@ -128,7 +168,7 @@ extension SearchTVC {
         cell?.backgroundColor = #colorLiteral(red: 0.4745098054, green: 0.8392156959, blue: 0.9764705896, alpha: 1)
         
         if isShowSearchResult {
-            cell?.textLabel?.text = searchData[indexPath.row]
+            cell?.textLabel?.text = container.filterdCities[indexPath.row].name
         } else {
             cell?.textLabel?.text = defaultCitys[indexPath.row]
         }
@@ -155,11 +195,13 @@ extension SearchTVC: UISearchBarDelegate,UISearchResultsUpdating {
         if searchController.searchBar.text?.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).count == 0 {
             return
         }
+        container.keyword = searchController.searchBar.text ?? ""
+
         searchCityData()
         
     }
     
-    
+    #warning("struct 計算屬性")
     func searchCityData() {
         searchData = cityForAPI.filter({(name) -> Bool in
             return name.lowercased().range(of: (searchController.searchBar.text!.lowercased())) != nil
@@ -181,6 +223,20 @@ extension SearchTVC: UISearchBarDelegate,UISearchResultsUpdating {
 }
 
 
-
-
-
+struct CityContainer {
+    
+    private var cities: [Result] = []
+    
+    var keyword: String = ""
+    var filterdCities: [Result] {
+        if keyword != "" {
+            return cities.filter({$0.name.contains(keyword)})
+        } else {
+            return cities
+        }
+    }
+    
+    mutating func updateCities(cities: [Result]) {
+        self.cities = cities
+    }
+}

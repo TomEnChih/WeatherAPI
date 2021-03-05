@@ -9,6 +9,8 @@ import UIKit
 
 class WeatherTVCell: UITableViewCell {
     
+    static let weatherCellID = "Cell"
+    
     let cityLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 25)

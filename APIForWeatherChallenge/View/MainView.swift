@@ -10,19 +10,28 @@ import UIKit
 class MainView: UIView {
 
     let weatherTableView = UITableView()
+    let fullScreenSize = UIScreen.main.bounds
     
     func setweatherTableView() {
         weatherTableView.register(WeatherTVCell.self, forCellReuseIdentifier: "Cell")
-//        weatherTableView.rowHeight = MainView.height * 0.08
+        weatherTableView.rowHeight = UITableView.automaticDimension
         weatherTableView.allowsSelectionDuringEditing = false
         weatherTableView.backgroundColor = #colorLiteral(red: 0.4745098054, green: 0.8392156959, blue: 0.9764705896, alpha: 1)
-//        weatherTableView.delegate = self
-//        weatherTableView.dataSource = self
+    }
+    func setweatherTableViewConstraints() {
+        weatherTableView.translatesAutoresizingMaskIntoConstraints = false
+        weatherTableView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
+        weatherTableView.widthAnchor.constraint(equalTo: self.widthAnchor).isActive = true
+        weatherTableView.heightAnchor.constraint(equalTo: self.heightAnchor).isActive = true
+        weatherTableView.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
     }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        addSubview(weatherTableView)
+        addSubview (weatherTableView)
+        setweatherTableViewConstraints()
+        setweatherTableView()
+        
     }
     
     required init?(coder: NSCoder) {

@@ -43,11 +43,27 @@ class FooterView: UIView {
         return label
     }()
     
+    func setFooterElementConstraints() {
+        let footerSearchButton = self.footerSearchButton
+        footerSearchButton.translatesAutoresizingMaskIntoConstraints = false
+        footerSearchButton.trailingAnchor.constraint(equalTo: self.trailingAnchor,constant: -10).isActive = true
+        footerSearchButton.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+        footerSearchButton.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        footerSearchButton.widthAnchor.constraint(equalToConstant: 30).isActive = true
+        
+        let footerStackView = self.footerStackView
+        footerStackView.translatesAutoresizingMaskIntoConstraints = false
+        footerStackView.leadingAnchor.constraint(equalTo: self.leadingAnchor,constant: 10).isActive = true
+        footerStackView.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+    }
+   
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = #colorLiteral(red: 0.4745098054, green: 0.8392156959, blue: 0.9764705896, alpha: 1)
         addSubview(footerSearchButton)
         addSubview(footerStackView)
+        setFooterElementConstraints()
     }
     
     required init?(coder: NSCoder) {

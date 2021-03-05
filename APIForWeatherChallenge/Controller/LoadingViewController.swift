@@ -45,7 +45,7 @@ class LoadingViewController: UIViewController {
         
         loadingView.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
         loadingView.center = self.view.center
-        loadingView.animationSpeed = 1
+        loadingView.animationSpeed = 2
         loadingView.contentMode = .scaleAspectFill
         loadingView.loopMode = .autoReverse
         view.backgroundColor = UIColor(displayP3Red: 0.3, green: 0.3, blue: 0.3, alpha: 0.5)
