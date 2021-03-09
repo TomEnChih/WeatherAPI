@@ -16,30 +16,33 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
     let mainView = MainView()
     let footerView = FooterView()
     
-    func setCurrentWeather(city:String) {
+    
+    func urlSelected(city:String) -> URL{
         let address = "http://api.openweathermap.org/data/2.5/weather?"
-        let urlDetermine:URL
         let modeSelect = Int(city)
-        #warning("有其他方法")
+        let urlDetermine:URL
+        
         if city.contains(","){
             
             let cityCoord = city.components(separatedBy: ",")
-            urlDetermine = URL(string: address+"lat=\(cityCoord[1])"+"&lon=\(cityCoord[0])"+"&units=metric"+"&appid=\(AppID.id)")!
+            urlDetermine = URL(string: address+"lat=\(cityCoord[1].urlEncoded())"+"&lon=\(cityCoord[0].urlEncoded())"+"&units=metric"+"&appid=\(AppID.id)")!
         }else{
             
             if modeSelect != nil {
                 
-                urlDetermine = URL(string:address+"id=\(city)"+"&units=metric"+"&appid=\(AppID.id)")!
+                urlDetermine = URL(string:address+"id=\(city.urlEncoded())"+"&units=metric"+"&appid=\(AppID.id)")!
                 
             }else{
                 urlDetermine = URL(string:address+"q=\(city.urlEncoded())"+"&units=metric"+"&appid=\(AppID.id)")!
                 
             }
         }
-        
-        
-        let url = urlDetermine
-        
+        return urlDetermine
+    }
+    
+    
+    func setCurrentWeather(city:String) {
+        let url = urlSelected(city: city)
         
         if  url == url {
             #warning("loading")
@@ -52,13 +55,11 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
                         print("Status code: \(response.statusCode)")
                         let decoder = JSONDecoder()
                         
+                        
                         if let weatherData = try? decoder.decode(WeatherData.self, from: data) {
                             //do catch
-//                            print(weatherData)
 //                            print("城市名稱: \(weatherData.name)")
-//                            print("經緯度: (\(weatherData.coord.lon),\(weatherData.coord.lat))")
 //                            print("溫度: \(weatherData.main.temp)°C")
-//                            print("描述: \(weatherData.weather[0].description)")
                             self.weathers.append(weatherData)
                             self.mainView.weatherTableView.reloadData()
                             
@@ -71,8 +72,6 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         }
         
     }
-    
-    
     
     func setweatherTableView() {
         mainView.weatherTableView.delegate = self
@@ -164,10 +163,9 @@ extension ViewController: UITableViewDelegate,UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        #warning("換 看mark")
         let cell = mainView.weatherTableView.dequeueReusableCell(withIdentifier: WeatherTVCell.weatherCellID, for: indexPath) as! WeatherTVCell
         let weatherIndex = weathers[indexPath.row]
-        cell.backgroundColor = #colorLiteral(red: 0.4745098054, green: 0.8392156959, blue: 0.9764705896, alpha: 1)
+        cell.backgroundColor = #colorLiteral(red: 0.8078431487, green: 0.02745098062, blue: 0.3333333433, alpha: 1)
         cell.isUserInteractionEnabled = false
         #warning("找更好的方法")
         let url = URL(string: "http://openweathermap.org/img/wn/\(weatherIndex.weather[0].icon)@2x.png")
@@ -185,6 +183,7 @@ extension ViewController: UITableViewDelegate,UITableViewDataSource {
         }
         return cell
     }
+    
 }
 
 //MARK: - delegate
@@ -203,3 +202,5 @@ extension ViewController {
         present(vc, animated: true, completion: nil)
     }
 }
+
+

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -15,6 +15,7 @@
 		D936D7CA25DE19AE00F153E7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D936D7C825DE19AE00F153E7 /* LaunchScreen.storyboard */; };
 		D936D7D525DE257900F153E7 /* WeatherMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D936D7D425DE257900F153E7 /* WeatherMode.swift */; };
 		D936D7DC25E394AA00F153E7 /* FooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D936D7DB25E394AA00F153E7 /* FooterView.swift */; };
+		D95A4F4D25F6221B007050C8 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = D95A4F4C25F6221B007050C8 /* SnapKit */; };
 		D95FB03625E7A42A0002261B /* CitySearchMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95FB03525E7A42A0002261B /* CitySearchMode.swift */; };
 		D95FB03A25E8A5AC0002261B /* AppID.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95FB03925E8A5AC0002261B /* AppID.swift */; };
 		D98801B225E4ACD3003BA545 /* SearchTVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = D98801B125E4ACD3003BA545 /* SearchTVC.swift */; };
@@ -54,6 +55,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9D32BA8F241D231BAC93A9FB /* Pods_APIForWeatherChallenge.framework in Frameworks */,
+				D95A4F4D25F6221B007050C8 /* SnapKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -168,6 +170,9 @@
 			dependencies = (
 			);
 			name = APIForWeatherChallenge;
+			packageProductDependencies = (
+				D95A4F4C25F6221B007050C8 /* SnapKit */,
+			);
 			productName = APIForWeatherChallenge;
 			productReference = D936D7BA25DE19A600F153E7 /* APIForWeatherChallenge.app */;
 			productType = "com.apple.product-type.application";
@@ -195,6 +200,9 @@
 				Base,
 			);
 			mainGroup = D936D7B125DE19A600F153E7;
+			packageReferences = (
+				D95A4F4B25F6221B007050C8 /* XCRemoteSwiftPackageReference "SnapKit" */,
+			);
 			productRefGroup = D936D7BB25DE19A600F153E7 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -471,6 +479,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D95A4F4B25F6221B007050C8 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SnapKit/SnapKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D95A4F4C25F6221B007050C8 /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D95A4F4B25F6221B007050C8 /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D936D7B225DE19A600F153E7 /* Project object */;
 }

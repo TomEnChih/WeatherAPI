@@ -56,7 +56,6 @@ class FooterView: UIView {
         footerStackView.leadingAnchor.constraint(equalTo: self.leadingAnchor,constant: 10).isActive = true
         footerStackView.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
     }
-   
     
     override init(frame: CGRect) {
         super.init(frame: frame)

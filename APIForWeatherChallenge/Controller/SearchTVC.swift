@@ -11,17 +11,15 @@ import Lottie
 class SearchTVC: UITableViewController {
     
     var searchController = UISearchController(searchResultsController: nil)
-    //城市集合
-    var cityListForAPI = [CityAPI]()
-    var cityForAPI = [String]()
     //搜尋的結果集合
-    var searchData:[String] = [String]()
-    var isShowSearchResult: Bool = false
+//    var searchData:[String] = [String]()
+    //預設城市
     var defaultCitys = ["Taipei","London","2172797","139,35","121.5319,25.0478"]
     var delegate: SearchResult!
     var cityResultForTableView: String?
     var cityResultForSearchBar: String?
-    
+    var isShowSearchResult: Bool = false
+    let searchTableViewCellID = "MyCell"
     var container: CityContainer = .init() {
         didSet {
             tableView.reloadData()
@@ -67,13 +65,8 @@ class SearchTVC: UITableViewController {
                 print("Status code: \(response.statusCode)")
                 let decoder = JSONDecoder()
                 if let cityData = try? decoder.decode(CityAPI.self, from: data) {
-                    var city:[String] = []
                     
-                    for i in 0..<cityData.results.count {
-                        city.append(cityData.results[i].name)
-                    }
                     self.container.updateCities(cities: cityData.results)
-                    self.cityForAPI.append(contentsOf: city)
                 }
                 
             }
@@ -85,7 +78,7 @@ class SearchTVC: UITableViewController {
     
     //MARK: tableView
     func setTableView() {
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "MyCell")
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: searchTableViewCellID)
         
     }
     //MARK: navigation
@@ -150,11 +143,11 @@ class SearchTVC: UITableViewController {
 //
 //}
 extension SearchTVC {
-    
+
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
-    
+
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if isShowSearchResult {
             return container.filterdCities.count
@@ -162,71 +155,70 @@ extension SearchTVC {
             return defaultCitys.count
         }
     }
-    
+
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "MyCell")
+        let cell = tableView.dequeueReusableCell(withIdentifier: searchTableViewCellID)
         cell?.backgroundColor = #colorLiteral(red: 0.4745098054, green: 0.8392156959, blue: 0.9764705896, alpha: 1)
-        
+
         if isShowSearchResult {
             cell?.textLabel?.text = container.filterdCities[indexPath.row].name
         } else {
             cell?.textLabel?.text = defaultCitys[indexPath.row]
         }
-        
+
         return cell!
     }
-    
+
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if isShowSearchResult {
-            cityResultForTableView = searchData[indexPath.row]
+            cityResultForTableView = container.filterdCities[indexPath.row].name
         } else {
             cityResultForTableView = defaultCitys[indexPath.row]
         }
         self.view.window?.rootViewController?.dismiss(animated: true, completion: nil)
     }
-    
+
 }
 //MARK: - search bar delegate
 extension SearchTVC: UISearchBarDelegate,UISearchResultsUpdating {
     
     // 當「準備要在searchBar輸入文字時」、「取消時」都會觸發該delegate
     func updateSearchResults(for searchController: UISearchController) {
-        
+        //還不是很懂
+        //若是沒有輸入任何文字或輸入空白則直接返回不做搜尋的動作
         if searchController.searchBar.text?.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).count == 0 {
-            return
-        }
-        container.keyword = searchController.searchBar.text ?? ""
-
-        searchCityData()
-        
-    }
-    
-    #warning("struct 計算屬性")
-    func searchCityData() {
-        searchData = cityForAPI.filter({(name) -> Bool in
-            return name.lowercased().range(of: (searchController.searchBar.text!.lowercased())) != nil
-        })
-        if searchData.count > 0 {
-            isShowSearchResult = true
-            tableView.separatorStyle = UITableViewCell.SeparatorStyle.init(rawValue: 1)!
+            isShowSearchResult = false
         }else{
-            tableView.separatorStyle = UITableViewCell.SeparatorStyle.none
+            isShowSearchResult = true
+            container.keyword = searchController.searchBar.text ?? ""
+//            searchCityData()
         }
-        
         tableView.reloadData()
     }
     
+//    #warning("struct 計算屬性")
+//    func searchCityData() {
+//        //name 是指 array 裡頭的資料
+//        //若 array 裡頭有資料符合 searchbar.text 會被加進 searchData
+//        //lowercased 讓資料都變小寫，就不會有大小寫差異
+//        searchData = cityForAPI.filter({(name) -> Bool in
+//            return name.lowercased().range(of: (searchController.searchBar.text!.lowercased())) != nil
+//        })
+//    }
+    
+    //結束編輯時的func
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
         cityResultForSearchBar = searchBar.text
         self.presentingViewController?.dismiss(animated: true, completion: nil)
     }
 }
 
-
+//MARK: -mentor 的搜尋方式 (struct 計算屬性)
+//可以讓code更乾淨，不會有這麼多city的儲存屬性擠在一起
 struct CityContainer {
-    
+    //儲存屬性 存城市資料
     private var cities: [Result] = []
-    
+    //判斷顯示的城市資料
     var keyword: String = ""
     var filterdCities: [Result] {
         if keyword != "" {
@@ -236,7 +228,9 @@ struct CityContainer {
         }
     }
     
+    //接 API 的城市資料
     mutating func updateCities(cities: [Result]) {
         self.cities = cities
+        print(cities)
     }
 }
