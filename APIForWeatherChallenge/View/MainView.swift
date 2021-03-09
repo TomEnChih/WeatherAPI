@@ -15,8 +15,6 @@ class MainView: UIView {
     func setweatherTableView() {
         weatherTableView.register(WeatherTVCell.self, forCellReuseIdentifier: "Cell")
         weatherTableView.rowHeight = UITableView.automaticDimension
-//        weatherTableView.rowHeight = fullScreenSize.height * 0.07
-//        weatherTableView.estimatedRowHeight = 300
         weatherTableView.allowsSelectionDuringEditing = false
         weatherTableView.backgroundColor = #colorLiteral(red: 0.4745098054, green: 0.8392156959, blue: 0.9764705896, alpha: 1)
     }

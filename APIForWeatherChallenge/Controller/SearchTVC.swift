@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import Lottie
 
 class SearchTVC: UITableViewController {
     
@@ -14,10 +13,13 @@ class SearchTVC: UITableViewController {
     //搜尋的結果集合
 //    var searchData:[String] = [String]()
     //預設城市
-    var defaultCitys = ["Taipei","London","2172797","139,35","121.5319,25.0478"]
-    var delegate: SearchResult!
+    var defaultCitys = ["Taipei","2172797","121.5319,25.0478"]
+    //搜尋紀錄
+    var cityRecord = [String]()
+    //傳給第一頁用
     var cityResultForTableView: String?
     var cityResultForSearchBar: String?
+    var delegate: SearchResult!
     var isShowSearchResult: Bool = false
     let searchTableViewCellID = "MyCell"
     var container: CityContainer = .init() {
@@ -26,54 +28,31 @@ class SearchTVC: UITableViewController {
         }
     }
     
-    
+    //MARK: - view 顯示
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = #colorLiteral(red: 0.4745098054, green: 0.8392156959, blue: 0.9764705896, alpha: 1)
         setTableView()
         setNavigation()
         setSearchController()
-        setCitySearch()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        tableView.reloadData()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        if cityResultForTableView == nil {
-            delegate.citySearch(city: cityResultForSearchBar ?? "")
-        }else{
-            delegate.citySearch(city: cityResultForTableView ?? "")
-        }
-    }
-    
-    
-    
-    func setCitySearch() {
-        let filter = """
-        {
-            "name": {
-                "$exists": true
+        if cityResultForTableView != nil || cityResultForSearchBar != nil {
+            
+            if cityResultForTableView == nil {
+                cityRecord.insert(cityResultForSearchBar!, at: 0)
+                delegate.citySearch(city: cityResultForSearchBar!, searchRecord: cityRecord)
+            }else{
+                cityRecord.insert(cityResultForTableView!, at: 0)
+                delegate.citySearch(city: cityResultForTableView!, searchRecord: cityRecord)
             }
         }
-        """.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-        let url = URL(string: "https://parseapi.back4app.com/classes/Country?limit=300&keys=name&where=\(filter!)")!
-        var urlRequest = URLRequest(url: url)
-        urlRequest.setValue("mxsebv4KoWIGkRntXwyzg6c6DhKWQuit8Ry9sHja", forHTTPHeaderField: "X-Parse-Application-Id") // This is the fake app's application id
-        urlRequest.setValue("TpO0j3lG2PmEVMXlKYQACoOXKQrL3lwM0HwR9dbH", forHTTPHeaderField: "X-Parse-Master-Key") // This is the fake app's readonly master key
-        URLSession.shared.dataTask(with: urlRequest, completionHandler: { (data, response, error) in
-            if let error = error {
-                print("Error: \(error.localizedDescription)")
-            }else if let response = response as? HTTPURLResponse,let data = data {
-                print("Status code: \(response.statusCode)")
-                let decoder = JSONDecoder()
-                if let cityData = try? decoder.decode(CityAPI.self, from: data) {
-                    
-                    self.container.updateCities(cities: cityData.results)
-                }
-                
-            }
-        }).resume()
-
     }
-    
     
     
     //MARK: tableView
@@ -105,54 +84,27 @@ class SearchTVC: UITableViewController {
     
 }
 //MARK: - set tableView
-//extension SearchTVC {
-//
-//    override func numberOfSections(in tableView: UITableView) -> Int {
-//        return 1
-//    }
-//
-//    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-//        if isShowSearchResult {
-//            return searchData.count
-//        }else{
-//            return defaultCitys.count
-//        }
-//    }
-//
-//    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        let cell = tableView.dequeueReusableCell(withIdentifier: "MyCell")
-//        cell?.backgroundColor = #colorLiteral(red: 0.4745098054, green: 0.8392156959, blue: 0.9764705896, alpha: 1)
-//
-//        if isShowSearchResult {
-//            cell?.textLabel?.text = searchData[indexPath.row]
-//        } else {
-//            cell?.textLabel?.text = defaultCitys[indexPath.row]
-//        }
-//
-//        return cell!
-//    }
-//
-//    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        if isShowSearchResult {
-//            cityResultForTableView = searchData[indexPath.row]
-//        } else {
-//            cityResultForTableView = defaultCitys[indexPath.row]
-//        }
-//        self.view.window?.rootViewController?.dismiss(animated: true, completion: nil)
-//    }
-//
-//}
 extension SearchTVC {
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        if isShowSearchResult {
+            return 1
+        }else{
+            return 2
+        }
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if isShowSearchResult {
             return container.filterdCities.count
         }else{
-            return defaultCitys.count
+            switch section {
+            case 0:
+                return defaultCitys.count
+            default:
+                return cityRecord.count
+            }
+            
         }
     }
 
@@ -163,7 +115,12 @@ extension SearchTVC {
         if isShowSearchResult {
             cell?.textLabel?.text = container.filterdCities[indexPath.row].name
         } else {
-            cell?.textLabel?.text = defaultCitys[indexPath.row]
+            switch indexPath.section {
+            case 0:
+                cell?.textLabel?.text = defaultCitys[indexPath.row]
+            default:
+                cell?.textLabel?.text = cityRecord[indexPath.row]
+            }
         }
 
         return cell!
@@ -173,11 +130,27 @@ extension SearchTVC {
         if isShowSearchResult {
             cityResultForTableView = container.filterdCities[indexPath.row].name
         } else {
-            cityResultForTableView = defaultCitys[indexPath.row]
+            switch indexPath.section {
+            case 0:
+                cityResultForTableView = defaultCitys[indexPath.row]
+            default:
+                cityResultForTableView = cityRecord[indexPath.row]
+            }
         }
         self.view.window?.rootViewController?.dismiss(animated: true, completion: nil)
     }
-
+    // Header
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        if isShowSearchResult {
+            return ""
+        }else{
+            switch section {
+            case 0: return "預設"
+            default: return "最近搜尋"
+            }
+        }
+    }
+    
 }
 //MARK: - search bar delegate
 extension SearchTVC: UISearchBarDelegate,UISearchResultsUpdating {
@@ -231,6 +204,5 @@ struct CityContainer {
     //接 API 的城市資料
     mutating func updateCities(cities: [Result]) {
         self.cities = cities
-        print(cities)
     }
 }

@@ -9,7 +9,7 @@ import Foundation
 
 
 protocol SearchResult {
-    func citySearch(city:String)
+    func citySearch(city:String,searchRecord:[String])
 }
 
 

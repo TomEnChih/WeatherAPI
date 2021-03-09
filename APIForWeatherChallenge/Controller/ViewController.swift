@@ -11,7 +11,11 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
     
     var weathers = [WeatherData]()
     var tempMode: tempTransform = .C
-    let fullScreenSize = UIScreen.main.bounds
+    //    let fullScreenSize = UIScreen.main.bounds
+    //第二頁城市資料
+    var cityData = [Result]()
+    //搜尋紀錄
+    var cityRecord = [String]()
     
     let mainView = MainView()
     let footerView = FooterView()
@@ -58,8 +62,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
                         
                         if let weatherData = try? decoder.decode(WeatherData.self, from: data) {
                             //do catch
-//                            print("城市名稱: \(weatherData.name)")
-//                            print("溫度: \(weatherData.main.temp)°C")
+                            //                            print("城市名稱: \(weatherData.name)")
+                            //                            print("溫度: \(weatherData.main.temp)°C")
                             self.weathers.append(weatherData)
                             self.mainView.weatherTableView.reloadData()
                             
@@ -70,6 +74,35 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         }else {
             print("Invalid URL")
         }
+        
+    }
+    
+    
+    func setCitySearch() {
+        let filter = """
+        {
+            "name": {
+                "$exists": true
+            }
+        }
+        """.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        let url = URL(string: "https://parseapi.back4app.com/classes/Country?limit=300&keys=name&where=\(filter!)")!
+        var urlRequest = URLRequest(url: url)
+        urlRequest.setValue("mxsebv4KoWIGkRntXwyzg6c6DhKWQuit8Ry9sHja", forHTTPHeaderField: "X-Parse-Application-Id") // This is the fake app's application id
+        urlRequest.setValue("TpO0j3lG2PmEVMXlKYQACoOXKQrL3lwM0HwR9dbH", forHTTPHeaderField: "X-Parse-Master-Key") // This is the fake app's readonly master key
+        URLSession.shared.dataTask(with: urlRequest, completionHandler: { (data, response, error) in
+            if let error = error {
+                print("Error: \(error.localizedDescription)")
+            }else if let response = response as? HTTPURLResponse,let data = data {
+                print("Status code: \(response.statusCode)")
+                let decoder = JSONDecoder()
+                if let cityData = try? decoder.decode(CityAPI.self, from: data) {
+                    
+                    self.cityData.append(contentsOf: cityData.results)
+                }
+                
+            }
+        }).resume()
         
     }
     
@@ -85,13 +118,14 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         setweatherTableView()
         setCurrentWeather(city: "taipei")
         singleFinger()
+        setCitySearch()
         footerView.footerSearchButton.addTarget(self, action: #selector(searchCityButton(sender:)), for: .touchUpInside)
         
     }
     override func viewDidAppear(_ animated: Bool) {
         presentLoadingVC()
     }
-
+    
     
     //MARK: - 刪除
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
@@ -110,13 +144,15 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return fullScreenSize.height * 0.07
+        return 62
     }
     
     @objc func searchCityButton(sender: UIButton) {
         let vc = SearchTVC()
         let nav = UINavigationController(rootViewController: vc)
         vc.delegate = self
+        vc.container.updateCities(cities: cityData)
+        vc.cityRecord = cityRecord
         present(nav, animated: true, completion: nil)
     }
     
@@ -188,9 +224,10 @@ extension ViewController: UITableViewDelegate,UITableViewDataSource {
 
 //MARK: - delegate
 extension ViewController: SearchResult {
-    func citySearch(city: String) {
+    func citySearch(city: String, searchRecord: [String]) {
         presentLoadingVC()
         setCurrentWeather(city: city)
+        cityRecord = searchRecord
     }
 }
 //MARK: - loading 畫面
