@@ -9,14 +9,14 @@ import UIKit
 
 class FooterView: UIView {
     
-    
-    let footerSearchButton: UIButton = {
+    // MARK: - IBElements
+    let searchButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(named: "search"), for: .normal)
         return button
     }()
     
-    lazy var footerStackView: UIStackView = {
+    lazy var labelStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [leftLabel,middleLabel,rightLabel])
         stackView.alignment = .fill
         stackView.axis = .horizontal
@@ -43,30 +43,33 @@ class FooterView: UIView {
         return label
     }()
     
-    func setFooterElementConstraints() {
-        let footerSearchButton = self.footerSearchButton
-        footerSearchButton.translatesAutoresizingMaskIntoConstraints = false
-        footerSearchButton.trailingAnchor.constraint(equalTo: self.trailingAnchor,constant: -10).isActive = true
-        footerSearchButton.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-        footerSearchButton.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        footerSearchButton.widthAnchor.constraint(equalToConstant: 30).isActive = true
+    // MARK: - Autolayout
+    private func autoLayout() {
         
-        let footerStackView = self.footerStackView
-        footerStackView.translatesAutoresizingMaskIntoConstraints = false
-        footerStackView.leadingAnchor.constraint(equalTo: self.leadingAnchor,constant: 10).isActive = true
-        footerStackView.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+        searchButton.snp.makeConstraints { (make) in
+            make.right.equalTo(self).offset(-10)
+            make.centerY.equalTo(self)
+            make.size.equalTo(30)
+        }
+        
+        labelStackView.snp.makeConstraints { (make) in
+            make.left.equalTo(self).offset(10)
+            make.centerY.equalTo(self)
+        }
     }
     
+    // MARK: - Init
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = #colorLiteral(red: 0.4745098054, green: 0.8392156959, blue: 0.9764705896, alpha: 1)
-        addSubview(footerSearchButton)
-        addSubview(footerStackView)
-        setFooterElementConstraints()
+        backgroundColor = .clear
+        addSubview(searchButton)
+        addSubview(labelStackView)
+        autoLayout()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - Methods
 }

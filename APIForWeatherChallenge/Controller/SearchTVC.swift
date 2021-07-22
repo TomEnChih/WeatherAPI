@@ -7,202 +7,221 @@
 
 import UIKit
 
-class SearchTVC: UITableViewController {
+class SearchTVC: UIViewController {
     
-    var searchController = UISearchController(searchResultsController: nil)
+    // MARK: - Properties
+//    var searchController = UISearchController(searchResultsController: nil)
     //搜尋的結果集合
 //    var searchData:[String] = [String]()
+    
+    private let searchView = SearchView()
+    
     //預設城市
-    var defaultCitys = ["Taipei","2172797","121.5319,25.0478"]
+    private let defaultCitys = ["Taipei","2172797","121.5319,25.0478"]
     //搜尋紀錄
     var cityRecord = [String]()
-    //傳給第一頁用
-    var cityResultForTableView: String?
-    var cityResultForSearchBar: String?
+    
     var delegate: SearchResult!
-    var isShowSearchResult: Bool = false
-    let searchTableViewCellID = "MyCell"
+    private var isShowSearchResult: Bool = false
+    
+    
     var container: CityContainer = .init() {
         didSet {
-            tableView.reloadData()
+            self.searchView.cityTableView.reloadData()
         }
     }
     
-    //MARK: - view 顯示
+    
+    enum CellType {
+        case defaultCity
+        case record
+    }
+    
+    private var defaultsection: [CellType] = [.defaultCity,.record]
+    
+    var searchData = [City]()
+    var searchResult: [City] = []
+    
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = #colorLiteral(red: 0.4745098054, green: 0.8392156959, blue: 0.9764705896, alpha: 1)
-        setTableView()
-        setNavigation()
-        setSearchController()
+        view = searchView
+        searchView.cityTableView.delegate = self
+        searchView.cityTableView.dataSource = self
+        setNavigationItem()
+        searchView.searchBar.addTarget(self, action: #selector(handleSearchCity), for: .editingChanged)
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        tableView.reloadData()
+        searchView.cityTableView.reloadData()
+    }
+
+    
+    // MARK: - Methods
+    
+    func setNavigationItem() {
+        navigationItem.title = "Add City"
+        navigationItem.largeTitleDisplayMode = .always
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.leftBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "return"), style: .plain, target: self, action: #selector(handleCancel))
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        if cityResultForTableView != nil || cityResultForSearchBar != nil {
+    @objc func handleCancel() {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    @objc func handleSearchCity() {
+        
+        if searchView.searchBar.text?.isEmpty == true {
+            isShowSearchResult = false
             
-            if cityResultForTableView == nil {
-                cityRecord.insert(cityResultForSearchBar!, at: 0)
-                delegate.citySearch(city: cityResultForSearchBar!, searchRecord: cityRecord)
-            }else{
-                cityRecord.insert(cityResultForTableView!, at: 0)
-                delegate.citySearch(city: cityResultForTableView!, searchRecord: cityRecord)
+        } else {
+            isShowSearchResult = true
+            searchResult = searchData.filter { (city) -> Bool in
+                city.countryName.lowercased().contains((searchView.searchBar.text?.lowercased())!)
             }
         }
+        self.searchView.cityTableView.reloadData()
     }
-    
-    
-    //MARK: tableView
-    func setTableView() {
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: searchTableViewCellID)
-        
-    }
-    //MARK: navigation
-    func setNavigation() {
-        self.title = "輸入城市、座標、編號"
-        self.navigationItem.searchController = searchController
-        self.navigationItem.hidesSearchBarWhenScrolling = false
-        self.navigationController?.navigationBar.barTintColor = #colorLiteral(red: 0.4745098054, green: 0.8392156959, blue: 0.9764705896, alpha: 1)
-    }
-    //MARK: searchController
-    func setSearchController() {
-        searchController.searchBar.searchBarStyle = .prominent
-        searchController.hidesNavigationBarDuringPresentation = false
-        //系統不推薦
-//        searchController.dimsBackgroundDuringPresentation = false
-        searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchResultsUpdater = self
-        searchController.searchBar.delegate = self
-        //searchBar cancel按鈕變中文
-        UIBarButtonItem.appearance(whenContainedInInstancesOf: [UISearchBar.self]).title = "取消"
-    }
-    
-    
     
 }
-//MARK: - set tableView
-extension SearchTVC {
 
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        if isShowSearchResult {
-            return 1
-        }else{
-            return 2
-        }
+//MARK: - UITableViewDelegate,UITableViewDataSource
+
+extension SearchTVC: UITableViewDelegate,UITableViewDataSource {
+
+    func numberOfSections(in tableView: UITableView) -> Int {
+        defaultsection.count
     }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if isShowSearchResult {
-            return container.filterdCities.count
-        }else{
-            switch section {
-            case 0:
-                return defaultCitys.count
-            default:
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        switch defaultsection[section] {
+        case .defaultCity:
+            return defaultCitys.count
+        case .record:
+            if isShowSearchResult == false {
                 return cityRecord.count
             }
+            return searchResult.count
+        }
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        switch defaultsection[indexPath.section] {
             
-        }
-    }
+        case .defaultCity:
+            
+            let cell = tableView.dequeueReusableCell(withIdentifier: "cell")
+            
+            cell?.textLabel?.text = defaultCitys[indexPath.row]
 
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: searchTableViewCellID)
-        cell?.backgroundColor = #colorLiteral(red: 0.4745098054, green: 0.8392156959, blue: 0.9764705896, alpha: 1)
-
-        if isShowSearchResult {
-            cell?.textLabel?.text = container.filterdCities[indexPath.row].name
-        } else {
-            switch indexPath.section {
-            case 0:
-                cell?.textLabel?.text = defaultCitys[indexPath.row]
-            default:
+            return cell!
+            
+        case .record:
+            
+            let cell = tableView.dequeueReusableCell(withIdentifier: "cell")
+            
+            if isShowSearchResult == false {
                 cell?.textLabel?.text = cityRecord[indexPath.row]
-            }
-        }
+                
+            } else {
+                cell?.textLabel?.text = searchResult[indexPath.row].countryName
 
-        return cell!
+            }
+            
+            return cell!
+        }
     }
 
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if isShowSearchResult {
-            cityResultForTableView = container.filterdCities[indexPath.row].name
-        } else {
-            switch indexPath.section {
-            case 0:
-                cityResultForTableView = defaultCitys[indexPath.row]
-            default:
-                cityResultForTableView = cityRecord[indexPath.row]
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        switch defaultsection[indexPath.section] {
+
+        case .defaultCity:
+
+            let city = defaultCitys[indexPath.row]
+            cityRecord.insert(city, at: 0)
+            delegate.citySearch(city: city, searchRecord: cityRecord)
+            dismiss(animated: true, completion: nil)
+            
+        case .record:
+
+            guard isShowSearchResult == true else {
+                
+                let city = cityRecord[indexPath.row]
+                cityRecord.insert(city, at: 0)
+                delegate.citySearch(city: city, searchRecord: cityRecord)
+                dismiss(animated: true, completion: nil)
+                return
             }
+            
+            let city = searchResult[indexPath.row].countryName
+            cityRecord.insert(city, at: 0)
+            delegate.citySearch(city: city, searchRecord: cityRecord)
+            dismiss(animated: true, completion: nil)
         }
-        self.view.window?.rootViewController?.dismiss(animated: true, completion: nil)
     }
+    
     // Header
-    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        if isShowSearchResult {
-            return ""
-        }else{
-            switch section {
-            case 0: return "預設"
-            default: return "最近搜尋"
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        
+        switch defaultsection[section] {
+            
+        case .defaultCity:
+
+            let title = "Default"
+
+            return title
+            
+        case .record:
+                       
+            guard isShowSearchResult == false else {
+                let title = "Search"
+                
+                return title
             }
+            
+            let title = "Record"
+
+            return title
         }
     }
     
-}
-//MARK: - search bar delegate
-extension SearchTVC: UISearchBarDelegate,UISearchResultsUpdating {
-    
-    // 當「準備要在searchBar輸入文字時」、「取消時」都會觸發該delegate
-    func updateSearchResults(for searchController: UISearchController) {
-        //還不是很懂
-        //若是沒有輸入任何文字或輸入空白則直接返回不做搜尋的動作
-        if searchController.searchBar.text?.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).count == 0 {
-            isShowSearchResult = false
-        }else{
-            isShowSearchResult = true
-            container.keyword = searchController.searchBar.text ?? ""
-//            searchCityData()
-        }
-        tableView.reloadData()
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        50
     }
     
-//    #warning("struct 計算屬性")
-//    func searchCityData() {
-//        //name 是指 array 裡頭的資料
-//        //若 array 裡頭有資料符合 searchbar.text 會被加進 searchData
-//        //lowercased 讓資料都變小寫，就不會有大小寫差異
-//        searchData = cityForAPI.filter({(name) -> Bool in
-//            return name.lowercased().range(of: (searchController.searchBar.text!.lowercased())) != nil
-//        })
-//    }
-    
-    //結束編輯時的func
-    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-        cityResultForSearchBar = searchBar.text
-        self.presentingViewController?.dismiss(animated: true, completion: nil)
+    func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        guard let tableView = view as? UITableViewHeaderFooterView else { return }
+        tableView.contentView.backgroundColor = .secondarySystemBackground
     }
+    
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        UIView()
+    }
+    
+    
+    
 }
 
 //MARK: -mentor 的搜尋方式 (struct 計算屬性)
 //可以讓code更乾淨，不會有這麼多city的儲存屬性擠在一起
 struct CityContainer {
     //儲存屬性 存城市資料
-    private var cities: [Result] = []
+    private var cities: [String] = []
     //判斷顯示的城市資料
     var keyword: String = ""
-    var filterdCities: [Result] {
+    var filterdCities: [String] {
         if keyword != "" {
-            return cities.filter({$0.name.contains(keyword)})
+            return cities.filter({$0.contains(keyword)})
         } else {
             return cities
         }
     }
     
     //接 API 的城市資料
-    mutating func updateCities(cities: [Result]) {
+    mutating func updateCities(cities: [String]) {
         self.cities = cities
     }
 }

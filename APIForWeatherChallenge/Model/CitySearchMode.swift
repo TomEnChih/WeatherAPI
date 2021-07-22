@@ -8,27 +8,13 @@
 import Foundation
 
 // MARK: - CityAPI
-struct CityAPI: Codable {
-    let results: [Result]
-}
-
-// MARK: - Result
-struct Result: Codable {
-    let objectID, name, createdAt, updatedAt: String
-    let languages, cities, timezones, provinces: Cities
+struct City: Codable {
+    let countryName: String
 
     enum CodingKeys: String, CodingKey {
-        case objectID = "objectId"
-        case name, createdAt, updatedAt, languages, cities, timezones, provinces
+        case countryName = "country_name"
     }
 }
 
-// MARK: - Cities
-struct Cities: Codable {
-    let type, className: String
+typealias CityAPI = [City]
 
-    enum CodingKeys: String, CodingKey {
-        case type = "__type"
-        case className
-    }
-}
