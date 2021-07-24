@@ -7,7 +7,7 @@
 
 import UIKit
 
-class SearchTVC: UIViewController {
+class SearchController: UIViewController {
     
     // MARK: - Properties
 //    var searchController = UISearchController(searchResultsController: nil)
@@ -48,8 +48,9 @@ class SearchTVC: UIViewController {
         view = searchView
         searchView.cityTableView.delegate = self
         searchView.cityTableView.dataSource = self
+        searchView.searchtextField.delegate = self
         setNavigationItem()
-        searchView.searchBar.addTarget(self, action: #selector(handleSearchCity), for: .editingChanged)
+        searchView.searchtextField.addTarget(self, action: #selector(handleSearchCity), for: .editingChanged)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -72,13 +73,13 @@ class SearchTVC: UIViewController {
     
     @objc func handleSearchCity() {
         
-        if searchView.searchBar.text?.isEmpty == true {
+        if searchView.searchtextField.text?.isEmpty == true {
             isShowSearchResult = false
             
         } else {
             isShowSearchResult = true
             searchResult = searchData.filter { (city) -> Bool in
-                city.countryName.lowercased().contains((searchView.searchBar.text?.lowercased())!)
+                city.countryName.lowercased().contains((searchView.searchtextField.text?.lowercased())!)
             }
         }
         self.searchView.cityTableView.reloadData()
@@ -88,7 +89,7 @@ class SearchTVC: UIViewController {
 
 //MARK: - UITableViewDelegate,UITableViewDataSource
 
-extension SearchTVC: UITableViewDelegate,UITableViewDataSource {
+extension SearchController: UITableViewDelegate,UITableViewDataSource {
 
     func numberOfSections(in tableView: UITableView) -> Int {
         defaultsection.count
@@ -200,9 +201,18 @@ extension SearchTVC: UITableViewDelegate,UITableViewDataSource {
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         UIView()
     }
+}
+
+extension SearchController: UITextFieldDelegate {
     
-    
-    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        
+        guard let text = textField.text,text != "" else { return true }
+        cityRecord.insert(text, at: 0)
+        delegate.citySearch(city: text, searchRecord: cityRecord)
+        dismiss(animated: true, completion: nil)
+        return true
+    }
 }
 
 //MARK: -mentor 的搜尋方式 (struct 計算屬性)

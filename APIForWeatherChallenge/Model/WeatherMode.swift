@@ -13,7 +13,9 @@ struct WeatherData:Decodable {
     var dt: Int
     var coord: Coord
     var main: Main
+    var sys: Sys
     var weather: [Weather]
+    var wind: Wind
 }
 
 
@@ -27,10 +29,21 @@ struct Main:Decodable {
     var humidity: Int
     var temp_min: Double
     var temp_max: Double
+    var feels_like: Double
 }
 
 struct Weather: Decodable {
     var icon: String
     var main: String
     var description: String
+}
+
+struct Sys: Codable {
+    let type, id: Int
+    let country: String
+    let sunrise, sunset: Int
+}
+
+struct Wind: Codable {
+    let speed: Double
 }

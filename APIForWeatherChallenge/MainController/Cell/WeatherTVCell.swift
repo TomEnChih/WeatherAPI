@@ -48,7 +48,7 @@ class WeatherTVCell: UITableViewCell {
         return image
     }()
     
-    let customBackgroundView : UIView = {
+    private let customBackgroundView : UIView = {
         let view = UIView()
         view.backgroundColor = .white
         view.layer.cornerRadius = 8.0
@@ -82,8 +82,8 @@ class WeatherTVCell: UITableViewCell {
         }
         
         weatherIcon.snp.makeConstraints { (make) in
-            make.top.equalTo(customBackgroundView)//.offset(5)
-            make.bottom.equalTo(customBackgroundView)//.offset(-5)
+            make.top.equalTo(customBackgroundView)
+            make.bottom.equalTo(customBackgroundView)
             make.right.equalTo(tempLabel.snp.left).offset(-10)
         }
         
@@ -97,7 +97,7 @@ class WeatherTVCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         backgroundColor = .clear
-        isUserInteractionEnabled = false
+        selectionStyle = .none
         addSubview(customBackgroundView)
         addSubview(cityLabel)
         addSubview(tempLabel)

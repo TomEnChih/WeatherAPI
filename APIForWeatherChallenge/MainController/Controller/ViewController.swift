@@ -151,7 +151,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
     }
     
     @objc func searchCityButton() {
-        let vc = SearchTVC()
+        let vc = SearchController()
         let nav = UINavigationController(rootViewController: vc)
         vc.delegate = self
         vc.searchData = cityData
@@ -223,6 +223,15 @@ extension ViewController: UITableViewDelegate,UITableViewDataSource {
             }
         }
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        let data = weathers[indexPath.row]
+        
+        let vc = WeatherController(data: data)
+        vc.modalPresentationStyle = .fullScreen
+        navigationController?.pushViewController(vc, animated: true)
     }
     
 }

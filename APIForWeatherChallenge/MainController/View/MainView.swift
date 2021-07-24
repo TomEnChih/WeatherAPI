@@ -9,16 +9,16 @@ import UIKit
 
 class MainView: UIView {
     // MARK: - Properties
-    let fullScreenSize = UIScreen.main.bounds
     
     // MARK: - IBElements
     
     let weatherTableView: UITableView = {
         let tv = UITableView()
         tv.register(WeatherTVCell.self, forCellReuseIdentifier: WeatherTVCell.id)
-        tv.allowsSelectionDuringEditing = false
+//        tv.allowsSelectionDuringEditing = false
         tv.backgroundColor = .clear
         tv.separatorStyle = .none
+        
         return tv
     }()
     

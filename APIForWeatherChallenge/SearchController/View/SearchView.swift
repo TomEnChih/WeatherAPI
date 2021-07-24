@@ -13,7 +13,7 @@ class SearchView: UIView {
     
     // MARK: - IBElements
     
-    let searchBar: UITextField = {
+    let searchtextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Enter city name, city ID, coordinate"
         textField.borderStyle = .roundedRect
@@ -37,7 +37,7 @@ class SearchView: UIView {
     
     private func autoLayout() {
         
-        searchBar.snp.makeConstraints { (make) in
+        searchtextField.snp.makeConstraints { (make) in
             make.top.equalTo(self.snp.topMargin).offset(15)
             make.centerX.equalTo(self)
             make.width.equalTo(self).offset(-50)
@@ -45,7 +45,7 @@ class SearchView: UIView {
         }
         
         cityTableView.snp.makeConstraints { (make) in
-            make.top.equalTo(searchBar.snp.bottom).offset(15)
+            make.top.equalTo(searchtextField.snp.bottom).offset(15)
             make.left.right.bottom.equalTo(self)
         }
         
@@ -57,7 +57,7 @@ class SearchView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .secondarySystemBackground
-        addSubview(searchBar)
+        addSubview(searchtextField)
         addSubview(cityTableView)
         autoLayout()
     }
